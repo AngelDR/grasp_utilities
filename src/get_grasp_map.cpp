@@ -12,6 +12,7 @@
 #define PI 3.14159265
 
 #include <Eigen/Dense>
+#include <Eigen/Eigenvalues> 
 
 using namespace Eigen;
 
@@ -24,6 +25,8 @@ int main(int argc, char** argv){
 
   ros::Rate rate(10.0);
  	Matrix4d transformation_matrix;
+  SelfAdjointEigenSolver<MatrixXd> eigen_solver;
+
 
  	// Get param : numero dedos
   int num_fingers_exp;
@@ -105,10 +108,12 @@ int main(int argc, char** argv){
           grasp_matrix(num_fila,num_col+2)=matriz_desplazamiento_i(num_fila,num_col+2);
           grasp_matrix(num_fila,num_col+3)=rotacion_aux(num_fila,2);
           id_finger++;
-
       }
     }
 
+    MatrixXd base = grasp_matrix * grasp_matrix.transpose();
+    eigen_solver.compute(base);
+    ROS_INFO_STREAM("Eigenvalues of the grasp matrix are: \n" << eigen_solver.eigenvalues().transpose());
     ROS_INFO_STREAM("/Grasp matrix: \n" << grasp_matrix);
   }
 
