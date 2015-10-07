@@ -45,16 +45,6 @@ int main(int argc, char** argv){
     
   ros::Rate rate(10.0);
   
-  ofstream myfile;
-  ofstream tactil_file;
-  myfile.open ("/home/aurova/Desktop/pruebas/resultados/positions.txt");
-  if(myfile.is_open())
-    ROS_INFO("Archivo posiciones abierto");
-   
-  tactil_file.open ("/home/aurova/Desktop/pruebas/resultados/pressure.txt");
-  if(tactil_file.is_open())
-    ROS_INFO("Archivo presion abierto");
-  
   int iteration = 0;
   double displacement = 0;
   double strain = 0;
@@ -86,30 +76,11 @@ int main(int argc, char** argv){
       } 
       else
         th_current_transf = transformSt;
-      
-      displacement = sqrt(pow((transformSt.transform.translation.x-th_initial_transf.transform.translation.x),2)
-			+ pow((transformSt.transform.translation.y-th_initial_transf.transform.translation.y),2)
-			+ pow((transformSt.transform.translation.z-th_initial_transf.transform.translation.z),2)
-			); 
-      
-      //transform.getRotaton();
-      std::cout << "x " << transformSt.transform.translation.x;
-      std::cout << " ";
-      std::cout << "Y " << transformSt.transform.translation.y;
-      std::cout << " ";
-      std::cout << "Z " << transformSt.transform.translation.z;
-      std::cout << " ";  
-      
-      myfile << transformSt.transform.translation.x;
-      myfile << " ";
-      myfile << transformSt.transform.translation.y;
-      myfile << " ";
-      myfile << transformSt.transform.translation.z;
-      myfile << " ";
-      myfile << displacement;
-      myfile << " ";
 
-    
+      displacement = sqrt(pow((transformSt.transform.translation.x-th_initial_transf.transform.translation.x),2)
+  			+ pow((transformSt.transform.translation.y-th_initial_transf.transform.translation.y),2)
+  			+ pow((transformSt.transform.translation.z-th_initial_transf.transform.translation.z),2)
+  			); 
       
       
       // transform -> get pose ff
@@ -127,23 +98,6 @@ int main(int argc, char** argv){
 		  + pow((transformSt.transform.translation.y-ff_initial_transf.transform.translation.y),2)
 		  + pow((transformSt.transform.translation.z-ff_initial_transf.transform.translation.z),2)
 		  ); 
-      /**
-      myfile << transform.getOrigin().x();
-      myfile << " ";
-      myfile << transform.getOrigin().y();
-      myfile << " ";
-      myfile << transform.getOrigin().z();
-      myfile << " ";
-      */
-      
-      myfile << transformSt.transform.translation.x;
-      myfile << " ";
-      myfile << transformSt.transform.translation.y;
-      myfile << " ";
-      myfile << transformSt.transform.translation.z;
-      myfile << " ";
-      myfile << displacement;
-      myfile << " ";
       
       // transform -> get pose mf
       transformSt = tfBuffer.lookupTransform("forearm", "mftip",
@@ -154,22 +108,6 @@ int main(int argc, char** argv){
 		  + pow((transformSt.transform.translation.y-mf_initial_transf.transform.translation.y),2)
 		  + pow((transformSt.transform.translation.z-mf_initial_transf.transform.translation.z),2)
 		  ); 
-      /**
-      myfile << transform.getOrigin().x();
-      myfile << " ";
-      myfile << transform.getOrigin().y();
-      myfile << " ";
-      myfile << transform.getOrigin().z();
-      myfile << " ";
-      */
-      myfile << transformSt.transform.translation.x;
-      myfile << " ";
-      myfile << transformSt.transform.translation.y;
-      myfile << " ";
-      myfile << transformSt.transform.translation.z;
-      myfile << " ";
-      myfile << displacement;
-      myfile << " ";
       
       // transform -> get pose rf
       transformSt = tfBuffer.lookupTransform("forearm", "rftip",
@@ -180,23 +118,6 @@ int main(int argc, char** argv){
 		  + pow((transformSt.transform.translation.y-rf_initial_transf.transform.translation.y),2)
 		  + pow((transformSt.transform.translation.z-rf_initial_transf.transform.translation.z),2)
 		  ); 
-      /**
-      myfile << transform.getOrigin().x();
-      myfile << " ";
-      myfile << transform.getOrigin().y();
-      myfile << " ";
-      myfile << transform.getOrigin().z();
-      myfile << " ";
-      */
-      
-      myfile << transformSt.transform.translation.x;
-      myfile << " ";
-      myfile << transformSt.transform.translation.y;
-      myfile << " ";
-      myfile << transformSt.transform.translation.z;
-      myfile << " ";
-      myfile << displacement;
-      myfile << " ";
       
       // transform -> get pose lf
       transformSt = tfBuffer.lookupTransform("forearm", "lftip",
@@ -207,29 +128,6 @@ int main(int argc, char** argv){
 		  + pow((transformSt.transform.translation.y-lf_initial_transf.transform.translation.y),2)
 		  + pow((transformSt.transform.translation.z-lf_initial_transf.transform.translation.z),2)
 		  ); 
-      /**
-      myfile << transform.getOrigin().x();
-      myfile << " ";
-      myfile << transform.getOrigin().y();
-      myfile << " ";
-      myfile << transform.getOrigin().z();
-      myfile << " ";
-      */
-      
-      myfile << transformSt.transform.translation.x;
-      myfile << " ";
-      myfile << transformSt.transform.translation.y;
-      myfile << " ";
-      myfile << transformSt.transform.translation.z;
-      myfile << " ";
-      myfile << displacement;
-      myfile << " ";
-      
-      // Guardar en archivos posiciones (posth, posff, posmf, posrf, poslf, timestamp)
-    
-      /**myfile << "\n"; */
-      myfile << iteration;
-      myfile << "\n";
       
     }
     catch (tf2::TransformException &ex) {
@@ -242,40 +140,12 @@ int main(int argc, char** argv){
     // Obtener mapa de presión
     if (pressure_client.call(srv_pressure))
     {
-      // guardar en archivos fuerza/presión
+      // Obtener strain (deformacion)   stretch ratio = l /L  ; l = longitud actual; L = longitud inicial
+      strain = getStretchRatio(th_initial_transf,th_current_transf,ff_initial_transf,ff_current_transf);
+      young_modulus = (srv_pressure.response.applied_force[0] + srv_pressure.response.applied_force[1]) / strain;
 
-	  tactil_file << srv_pressure.response.applied_force[0];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.applied_force[1];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.applied_force[2];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.applied_force[3];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.applied_force[4];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.force_deviation[0];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.force_deviation[1];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.force_deviation[2];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.force_deviation[3];
-	  tactil_file << " ";
-	  tactil_file << srv_pressure.response.force_deviation[4];
-	  tactil_file << " ";
-	  tactil_file << iteration;
-	  tactil_file << "\n";
-
-
-
-    // Obtener strain (deformacion)   stretch ratio = l /L  ; l = longitud actual; L = longitud inicial
-    strain = getStretchRatio(th_initial_transf,th_current_transf,ff_initial_transf,ff_current_transf);
-    young_modulus = (srv_pressure.response.applied_force[0] + srv_pressure.response.applied_force[1]) / strain;
-
-    ROS_INFO("Current stretch ratio : %f", strain);
-    ROS_INFO("Current young modulus: %f", young_modulus);
-
+      ROS_INFO("Current stretch ratio : %f", strain);
+      ROS_INFO("Current young modulus: %f", young_modulus);
     }
     else
     {
@@ -285,10 +155,5 @@ int main(int argc, char** argv){
     iteration++;
     rate.sleep();
   }
-  
-  myfile.close();
-  tactil_file.close();
-
-  ROS_INFO("Archivo cerrado");
   return 0;
 };
