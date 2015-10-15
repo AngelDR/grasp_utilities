@@ -13,8 +13,58 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues> 
+#include <visualization_msgs/Marker.h>
+#include <string>
 
 using namespace Eigen;
+
+// Funcion para obtener valor singular minimo de la matriz de agarre
+double getMinimumSingularValue(const MatrixXd &grasp_matrix)
+{   
+  MatrixXd base = grasp_matrix * grasp_matrix.transpose();
+  SelfAdjointEigenSolver<MatrixXd> eigen_solver;
+  eigen_solver.compute(base);
+  //ROS_INFO_STREAM("Eigenvalues of the grasp matrix are: \n" << eigen_solver.eigenvalues().transpose());
+  // singular values:
+
+  std::vector<double> v_singular_values;
+  for(int i=0; i<6 ; i++){
+    v_singular_values.push_back(sqrt(eigen_solver.eigenvalues()[i]));
+  }
+  double min = v_singular_values[0];
+  for(int i=0; i<6 ; i++){
+    if(v_singular_values[i] < min) min = v_singular_values[i];
+  }
+  return min;
+}
+
+
+// Funcion para obtener valor singular maximo de la matriz de agarre
+double getMaximumSingularValue(const MatrixXd &grasp_matrix)
+{   
+  MatrixXd base = grasp_matrix * grasp_matrix.transpose();
+  SelfAdjointEigenSolver<MatrixXd> eigen_solver;
+  eigen_solver.compute(base);
+  //ROS_INFO_STREAM("Eigenvalues of the grasp matrix are: \n" << eigen_solver.eigenvalues().transpose());
+  // singular values:
+
+  std::vector<double> v_singular_values;
+  for(int i=0; i<6 ; i++){
+    v_singular_values.push_back(sqrt(eigen_solver.eigenvalues()[i]));
+  }
+  double max = v_singular_values[0];
+  for(int i=0; i<6 ; i++){
+    if(v_singular_values[i] > max) max = v_singular_values[i];
+  }
+  return max;
+}
+
+// Funcion para obtner indice de isotropia de la matriz de agarre
+double isotropyOfGraspMap(const MatrixXd &grasp_matrix){
+  return getMinimumSingularValue(grasp_matrix) / getMaximumSingularValue(grasp_matrix);
+}
+
+
 
 int main(int argc, char** argv){
 	ros::init(argc, argv, "get_grasp_map");
@@ -25,23 +75,39 @@ int main(int argc, char** argv){
 
   ros::Rate rate(10.0);
  	Matrix4d transformation_matrix;
-  SelfAdjointEigenSolver<MatrixXd> eigen_solver;
 
+  // Marker visualizacion valores de grasp Matrix: (texto con valor singular minimo/maximo/isotropia) 
+  ros::Publisher grasp_marker_pub = node.advertise<visualization_msgs::Marker>( "grasp_matrix_marker", 0 );
+  visualization_msgs::Marker  grasp_matrix_marker;
 
- 	// Get param : numero dedos
-  int num_fingers_exp;
-  if (node.getParam("/grasp_reconfigure/number_fingers", num_fingers_exp))
-  {
-    ROS_INFO("Numero de dedos para el experimento : %d", num_fingers_exp); 
-  }
-  else{
-    num_fingers_exp = 4;
-  }
+  grasp_matrix_marker.header.frame_id = "forearm";
+  grasp_matrix_marker.ns = "grasp";
+  grasp_matrix_marker.id = 5;
+  grasp_matrix_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+  grasp_matrix_marker.action = visualization_msgs::Marker::ADD;
+  // Todo: anadir params
+  grasp_matrix_marker.scale.x = 0.1; // Param
+  grasp_matrix_marker.scale.y = 0.1; // Param
+  grasp_matrix_marker.scale.z = 0.1; //
+  grasp_matrix_marker.color.a = 1.0; // Don't forget to set the alpha!
+  grasp_matrix_marker.color.r = 0.0;
+  grasp_matrix_marker.color.g = 1.0;
+  grasp_matrix_marker.color.b = 0.0;
 
   std::string lista_frames[6] = {"object_frame","thtip","fftip","mftip","rftip","lftip"};
   tf::StampedTransform transform[6];
 
 	while (node.ok()){
+
+    // Get param : numero dedos
+    int num_fingers_exp;
+    if (node.getParam("/grasp_reconfiguration/number_fingers", num_fingers_exp))
+    {
+      ROS_INFO("Numero de dedos para el experimento : %d", num_fingers_exp); 
+    }
+    else{
+      num_fingers_exp = 4;
+    }
     MatrixXd grasp_matrix(6,4*(num_fingers_exp));
 
     // Rellenar grasp_map : frame referencia = forearm
@@ -82,39 +148,39 @@ int main(int argc, char** argv){
 
 
     // Rellenar segunda parte
-        // Rellenar grasp_map
+    // Rellenar grasp_map
     for(int num_fila = 3; num_fila < 6; num_fila++){
         int id_finger = 1;
         for(int num_col = 0; num_col < 4*num_fingers_exp ; num_col+=4){
 
           // obtener [p x]
           tf::Quaternion q = transform[id_finger].getRotation();
-          tf::Matrix3x3 rotation_matrix(q);      
-
+          tf::Matrix3x3 rotation_matrix(q);  
           Matrix3d matriz_desplazamiento_i;
           matriz_desplazamiento_i <<  0, -matriz_desplazamientos(id_finger-1,2),matriz_desplazamientos(id_finger-1,1), 
-                                  matriz_desplazamientos(id_finger-1,2),0,-matriz_desplazamientos(id_finger-1,0),
-                                  -matriz_desplazamientos(id_finger-1,1),matriz_desplazamientos(id_finger-1,0),0;
+                                    matriz_desplazamientos(id_finger-1,2),0,-matriz_desplazamientos(id_finger-1,0),
+                                    -matriz_desplazamientos(id_finger-1,1),matriz_desplazamientos(id_finger-1,0),0;    
+
           Matrix3d rotacion_aux;
           rotacion_aux <<  rotation_matrix[0].getX(), rotation_matrix[0].getY(), rotation_matrix[0].getZ(), 
                         rotation_matrix[1].getX(), rotation_matrix[1].getY(), rotation_matrix[1].getZ(),
                         rotation_matrix[2].getX(), rotation_matrix[2].getY(), rotation_matrix[2].getZ();
           matriz_desplazamiento_i = matriz_desplazamiento_i * rotacion_aux;
 
-
-
-          grasp_matrix(num_fila,num_col)=matriz_desplazamiento_i(num_fila,num_col); 
-          grasp_matrix(num_fila,num_col+1)=matriz_desplazamiento_i(num_fila,num_col+1);
-          grasp_matrix(num_fila,num_col+2)=matriz_desplazamiento_i(num_fila,num_col+2);
-          grasp_matrix(num_fila,num_col+3)=rotacion_aux(num_fila,2);
+          grasp_matrix(num_fila,num_col)=matriz_desplazamiento_i(num_fila-3,0); 
+          grasp_matrix(num_fila,num_col+1)=matriz_desplazamiento_i(num_fila-3,1);
+          grasp_matrix(num_fila,num_col+2)=matriz_desplazamiento_i(num_fila-3,2);
+          grasp_matrix(num_fila,num_col+3)=rotacion_aux(num_fila-3,2);
           id_finger++;
       }
     }
 
-    MatrixXd base = grasp_matrix * grasp_matrix.transpose();
-    eigen_solver.compute(base);
-    ROS_INFO_STREAM("Eigenvalues of the grasp matrix are: \n" << eigen_solver.eigenvalues().transpose());
     ROS_INFO_STREAM("/Grasp matrix: \n" << grasp_matrix);
-  }
+    std::string text_of_marker = "Minimo valor singular: " + boost::lexical_cast<std::string>(getMinimumSingularValue(grasp_matrix)) + " \nMaximo valor singular: " + boost::lexical_cast<std::string>(getMaximumSingularValue(grasp_matrix))
+      + " \nIsotropia: " + boost::lexical_cast<std::string>(isotropyOfGraspMap(grasp_matrix)); 
+    grasp_matrix_marker.text = text_of_marker;
+    grasp_matrix_marker.pose.position.z = 1.0;
+    grasp_marker_pub.publish(grasp_matrix_marker);
 
+  }
 };

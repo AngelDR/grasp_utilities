@@ -51,98 +51,111 @@ int main(int argc, char** argv){
 	object_marker.color.g = 1.0;
 	object_marker.color.b = 0.0;
 
-  	ros::Rate rate(10.0);
+  ros::Rate rate(10.0);
  	Matrix4d transformation_matrix;
 
- 	// Get param : posicion forearm (altura & rotacion)
- 	double forearm_height, forearm_angle;
- 	if (node.getParam("/object_marker/forearm_height", forearm_height))
-    {
-      ROS_INFO("Altura del brazo : %f", forearm_height); 
-    }
-    else
-    {
-      forearm_height = 0.3;
-    }
+  while (node.ok()){
 
- 	if (node.getParam("/object_marker/forearm_angle", forearm_angle))
-    {
-      ROS_INFO("Angulo del brazo : %f", forearm_angle); 
-    }
-    else
-    {
-      forearm_angle = 0.5;
-    }
+      // Get param : forma del objeto
+      int object_form;
+      if (node.getParam("/object_marker_reconfiguration/form", object_form))
+      {
+        ROS_INFO("Forma del objeto : %d", object_form); 
+        object_marker.type = object_form;
+      }
+      else
+      {
+        object_form = 1;
+      }
 
+   	  // Get param : posicion forearm (altura & rotacion)
+   	  double forearm_height, forearm_angle;
+   	  if (node.getParam("/object_marker_reconfiguration/forearm_height", forearm_height))
+      {
+        ROS_INFO("Altura del brazo : %f", forearm_height); 
+      }
+      else
+      {
+        forearm_height = 0.3;
+      }
 
-    // Get param: dimensiones objec (x,y,z)
-    double dim_x, dim_y, dim_z;
-    if (node.getParam("/object_marker/dim_x", dim_x))
-    {
-      ROS_INFO("Dim x : %f", dim_x); 
-    }
-    else
-    {
-      dim_x = 0.135;
-    }
+   	  if (node.getParam("/object_marker_reconfiguration/forearm_angle", forearm_angle))
+      {
+        ROS_INFO("Angulo del brazo : %f", forearm_angle); 
+      }
+      else
+      {
+        forearm_angle = 0.5;
+      }
 
- 	if (node.getParam("/object_marker/dim_y", dim_y))
-    {
-      ROS_INFO("Dim y : %f", dim_y); 
-    }
-    else
-    {
-      dim_y = 0.045;
-    }
+      // Get param: dimensiones objec (x,y,z)
+      double dim_x, dim_y, dim_z;
+      if (node.getParam("/object_marker_reconfiguration/dim_x", dim_x))
+      {
+        ROS_INFO("Dim x : %f", dim_x); 
+      }
+      else
+      {
+        dim_x = 0.135;
+      }
 
-    if (node.getParam("/object_marker/dim_z", dim_z))
-    {
-      ROS_INFO("dim_z : %f", dim_z); 
-    }
-    else
-    {
-      dim_z = 0.077;
-    }
+   	  if (node.getParam("/object_marker_reconfiguration/dim_y", dim_y))
+      {
+        ROS_INFO("Dim y : %f", dim_y); 
+      }
+      else
+      {
+        dim_y = 0.045;
+      }
 
-    // Get param: Posicion objeto (x,y,z)
-    double pos_x, pos_y, pos_z;
-    if (node.getParam("/object_marker/pos_x", pos_x))
-    {
-      ROS_INFO("Pos x : %f", pos_x); 
-    }
-    else
-    {
-      pos_x = 0.0;
-    }
+      if (node.getParam("/object_marker_reconfiguration/dim_z", dim_z))
+      {
+        ROS_INFO("dim_z : %f", dim_z); 
+      }
+      else
+      {
+        dim_z = 0.077;
+      }
 
- 	if (node.getParam("/object_marker/pos_y", pos_y))
-    {
-      ROS_INFO("Pos y : %f", pos_y); 
-    }
-    else
-    {
-      pos_y = 0.0225;
-    }
+      // Get param: Posicion objeto (x,y,z)
+      double pos_x, pos_y, pos_z;
+      if (node.getParam("/object_marker_reconfiguration/pos_x", pos_x))
+      {
+        ROS_INFO("Pos x : %f", pos_x); 
+      }
+      else
+      {
+        pos_x = 0.0;
+      }
 
-    if (node.getParam("/object_marker/pos_z", pos_z))
-    {
-      ROS_INFO("pos_z : %f", pos_z); 
-    }
-    else
-    {
-      pos_z = 0.3;
-    }
+   	  if (node.getParam("/object_marker_reconfiguration/pos_y", pos_y))
+      {
+        ROS_INFO("Pos y : %f", pos_y); 
+      }
+      else
+      {
+        pos_y = 0.0225;
+      }
 
-    // Define rotation matrix (forearm, forearm_proj_plane)
-    //tf::Matrix3x3 rotation_(1,0,0,0, cos(forearm_angle), -sin(forearm_angle),0, sin(forearm_angle), cos(forearm_angle));
-    tf::Matrix3x3 rotation_(cos(-forearm_angle),0,sin(-forearm_angle),0,1,0,-sin(-forearm_angle),0, cos(-forearm_angle));
-    //tf::Matrix3x3 rotation_(cos(forearm_angle), -sin(forearm_angle),0,sin(forearm_angle),cos(forearm_angle),0,0,0,1);
+      if (node.getParam("/object_marker_reconfiguration/pos_z", pos_z))
+      {
+        ROS_INFO("pos_z : %f", pos_z); 
+      }
+      else
+      {
+        pos_z = 0.3;
+      }
 
-    double roll_, pitch_, yaw_;
+      // Define rotation matrix (forearm, forearm_proj_plane)
+      //tf::Matrix3x3 rotation_(1,0,0,0, cos(forearm_angle), -sin(forearm_angle),0, sin(forearm_angle), cos(forearm_angle));
+      tf::Matrix3x3 rotation_(cos(-forearm_angle),0,sin(-forearm_angle),0,1,0,-sin(-forearm_angle),0, cos(-forearm_angle));
+      //tf::Matrix3x3 rotation_(cos(forearm_angle), -sin(forearm_angle),0,sin(forearm_angle),cos(forearm_angle),0,0,0,1);
 
-    rotation_.getEulerYPR(yaw_,pitch_, roll_);
+      double roll_, pitch_, yaw_;
 
-  	while (node.ok()){
+      rotation_.getEulerYPR(yaw_,pitch_, roll_);
+
+  	
 
   		// Crear frame en proyeccion forearm
     	transform.setOrigin(tf::Vector3(0.0, -forearm_height * cos(forearm_angle), forearm_height * sin(forearm_angle) ) );
@@ -161,6 +174,10 @@ int main(int argc, char** argv){
 	    object_marker.pose.position.x = pos_x;
 	    object_marker.pose.position.y = pos_y;
 	    object_marker.pose.position.z = pos_z;
+
+      object_marker.scale.x = dim_x;
+      object_marker.scale.y = dim_y; 
+      object_marker.scale.z = dim_z; 
     	rate.sleep();  
 
     	object_marker_pub.publish(object_marker);

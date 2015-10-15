@@ -23,6 +23,7 @@ find_package(Boost REQUIRED system filesystem date_time thread)
 #add dynamic reconfigure api
 generate_dynamic_reconfigure_options(
   cfg/grasp_reconfiguration.cfg
+  cfg/object_marker_reconfiguration.cfg
   #...
 )
 
@@ -76,6 +77,7 @@ add_executable(sensor_tf_broadcaster src/sensor_tf_broadcaster.cpp)
 add_executable(finger_jacobian_service src/finger_jacobian_service.cpp)
 add_executable(get_young_modulus src/get_young_modulus.cpp)
 add_executable(grasp_reconfiguration src/grasp_reconfiguration.cpp)
+add_executable(object_marker_reconfiguration src/object_marker_reconfiguration.cpp)
 
 
 target_link_libraries(object_marker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -84,6 +86,7 @@ target_link_libraries(sensor_tf_broadcaster ${catkin_LIBRARIES} ${Boost_LIBRARIE
 target_link_libraries(finger_jacobian_service ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(get_young_modulus ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(grasp_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(object_marker_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 
 install(TARGETS object_marker DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -92,11 +95,7 @@ install(TARGETS sensor_tf_broadcaster DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATI
 install(TARGETS finger_jacobian_service DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS get_young_modulus DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS grasp_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-
-
-
-
+install(TARGETS object_marker_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
 #common commands for building c++ executables and libraries
