@@ -9,6 +9,8 @@
 #include "std_msgs/Float64.h"
 #include "tekscan_client/GetPressureMap.h"
 #include <math.h>
+#include <iostream>
+#include <fstream>
 #define PI 3.14159265
 
 #include <Eigen/Dense>
@@ -17,6 +19,7 @@
 #include <string>
 
 using namespace Eigen;
+using namespace std;
 
 // Funcion para obtener valor singular minimo de la matriz de agarre
 double getMinimumSingularValue(const MatrixXd &grasp_matrix)
@@ -80,7 +83,7 @@ int main(int argc, char** argv){
   ros::Publisher grasp_marker_pub = node.advertise<visualization_msgs::Marker>( "grasp_matrix_marker", 0 );
   visualization_msgs::Marker  grasp_matrix_marker;
 
-  grasp_matrix_marker.header.frame_id = "forearm";
+  grasp_matrix_marker.header.frame_id = "shadow_world_frame";
   grasp_matrix_marker.ns = "grasp";
   grasp_matrix_marker.id = 5;
   grasp_matrix_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
@@ -96,6 +99,14 @@ int main(int argc, char** argv){
 
   std::string lista_frames[6] = {"object_frame","thtip","fftip","mftip","rftip","lftip"};
   tf::StampedTransform transform[6];
+
+
+  // Archivos 
+  ofstream grasp_map_file;
+  grasp_map_file.open ("/home/aurova/Desktop/pruebas/resultados/grasp_map_values.txt");
+  if(grasp_map_file.is_open())
+    ROS_INFO("Archivo para valores de grasp matrix");
+  int iteration = 0;
 
 	while (node.ok()){
 
@@ -182,5 +193,26 @@ int main(int argc, char** argv){
     grasp_matrix_marker.pose.position.z = 1.0;
     grasp_marker_pub.publish(grasp_matrix_marker);
 
+
+    // Escribir en archivo si esta activada escritura:
+    int write;
+    if(node.getParam("/grasp_reconfiguration/write_files", write))
+    {
+      ROS_INFO("Escribir en archivo : %d"); 
+    }
+    else{
+      write = 0;
+    }
+
+    if(write)
+    {
+      grasp_map_file << boost::lexical_cast<std::string>(getMinimumSingularValue(grasp_matrix)) << " " << boost::lexical_cast<std::string>(getMaximumSingularValue(grasp_matrix))
+      << " " << boost::lexical_cast<std::string>(isotropyOfGraspMap(grasp_matrix)) <<" ";
+      grasp_map_file << iteration << "\n"; 
+    }
+
+    iteration++;
   }
+
+  grasp_map_file.close();
 };

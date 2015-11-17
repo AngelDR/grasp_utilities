@@ -1,0 +1,25 @@
+<launch>
+
+  <!-- Dynamic reconfiguration for object marker -->
+  <node name="object_marker_reconfiguration" pkg="grasp_utilities" type="object_marker_reconfiguration" respawn="false" output="screen">
+  </node>
+
+  <node name="grasp_reconfiguration" pkg="grasp_utilities" type="grasp_reconfiguration" respawn="false" output="screen">
+  </node>
+
+   <node name="tactile_servo_reconfiguration" pkg="grasp_utilities" type="tactile_servo_reconfiguration" respawn="false" output="screen">
+  </node>
+
+  <!-- OBJECT MARKER   -->
+  <node name="object_marker" pkg="grasp_utilities" type="object_marker" respawn="false" output="screen">
+  </node>
+
+  <!-- SENSOR TF BROADCASTER   -->
+  <node name="sensor_tf_broadcaster" pkg="grasp_utilities" type="sensor_tf_broadcaster" respawn="false" output="screen">
+  </node>
+
+
+
+
+  
+</launch>

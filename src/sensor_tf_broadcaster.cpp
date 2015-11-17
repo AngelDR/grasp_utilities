@@ -188,6 +188,8 @@ int main(int argc, char** argv){
   Matrix4d transformation_matrix;
   MatrixXd vector_cell(4,1);
 
+  ros::Time now = ros::Time::now();
+
   while (node.ok()){
     transform.setOrigin( tf::Vector3(0.0, 0.0, -0.015) );
     transform.setRotation( tf::Quaternion(0, 0, 0, 1) );
@@ -198,15 +200,17 @@ int main(int argc, char** argv){
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "thtip", "thsensor"));
     rate.sleep();
 
+	now = ros::Time(0);
     if (pressure_client.call(srv_pressure))
     {
 
         // Visualization
         // Visualizacion forces
+       
         try{
-	      	ros::Time now = ros::Time::now();
+        	//ros::Time now = ros::Time::now();
 	      	tf::StampedTransform transform;
-	      	tfListener.waitForTransform("forearm", "ffsensor", now, ros::Duration(3.0));
+	      	tfListener.waitForTransform("forearm", "ffsensor", now, ros::Duration(1.0));
 	      	tfListener.lookupTransform("forearm", "ffsensor", now, transform);
 
 	      	tf::Quaternion q = transform.getRotation();
@@ -236,7 +240,7 @@ int main(int argc, char** argv){
 	      	marker_array.markers[1].pose.orientation.z = transform.getRotation().getZ();
 	      	marker_array.markers[1].pose.orientation.w = transform.getRotation().getW();
 	      	// Mostrar tamaño flecha proporcional a fuerza
-	      	marker_array.markers[1].scale.x = 0.01 * srv_pressure.response.applied_force[1];
+	      	marker_array.markers[1].scale.x = 0.1 * srv_pressure.response.applied_force[1];
 
         }catch (tf2::TransformException &ex) {
           ROS_WARN("%s",ex.what());
@@ -247,9 +251,9 @@ int main(int argc, char** argv){
             // Visualization
         // Visualizacion forces
         try{
-          	ros::Time now = ros::Time::now();
+          	//ros::Time now = ros::Time::now();
           	tf::StampedTransform transform;
-          	tfListener.waitForTransform("forearm", "mfsensor", now, ros::Duration(3.0));
+          	tfListener.waitForTransform("forearm", "mfsensor", now, ros::Duration(1.0));
           	tfListener.lookupTransform("forearm", "mfsensor", now, transform);
 	      	
 	      	tf::Quaternion q = transform.getRotation();
@@ -279,7 +283,7 @@ int main(int argc, char** argv){
 	      	marker_array.markers[2].pose.orientation.z = transform.getRotation().getZ();
 	      	marker_array.markers[2].pose.orientation.w = transform.getRotation().getW();
 	      	// Mostrar tamaño flecha proporcional a fuerza
-	      	marker_array.markers[2].scale.x = 0.01 * srv_pressure.response.applied_force[2];
+	      	marker_array.markers[2].scale.x = 0.1 * srv_pressure.response.applied_force[2];
         }catch (tf2::TransformException &ex) {
           ROS_WARN("%s",ex.what());
           ros::Duration(1.0).sleep();
@@ -290,9 +294,9 @@ int main(int argc, char** argv){
          // Visualization
         // Visualizacion forces
         try{
-          	ros::Time now = ros::Time::now();
+          	//ros::Time now = ros::Time::now();
           	tf::StampedTransform transform;
-          	tfListener.waitForTransform("forearm", "rfsensor", now, ros::Duration(3.0));
+          	tfListener.waitForTransform("forearm", "rfsensor", now, ros::Duration(1.0));
           	tfListener.lookupTransform("forearm", "rfsensor", now, transform);
 	      	
 	      	tf::Quaternion q = transform.getRotation();
@@ -322,7 +326,7 @@ int main(int argc, char** argv){
 	      	marker_array.markers[3].pose.orientation.z = transform.getRotation().getZ();
 	      	marker_array.markers[3].pose.orientation.w = transform.getRotation().getW();
 	      	// Mostrar tamaño flecha proporcional a fuerza
-	      	marker_array.markers[3].scale.x = 0.01 * srv_pressure.response.applied_force[3];
+	      	marker_array.markers[3].scale.x = 0.1 * srv_pressure.response.applied_force[3];
 
         }catch (tf2::TransformException &ex) {
           ROS_WARN("%s",ex.what());
@@ -334,9 +338,9 @@ int main(int argc, char** argv){
                  // Visualization
         // Visualizacion forces
         try{
-          	ros::Time now = ros::Time::now();
+          	//ros::Time now = ros::Time::now();
           	tf::StampedTransform transform;
-          	tfListener.waitForTransform("forearm", "lfsensor", now, ros::Duration(3.0));
+          	tfListener.waitForTransform("forearm", "lfsensor", now, ros::Duration(1.0));
           	tfListener.lookupTransform("forearm", "lfsensor", now, transform);
  	      	
  	      	tf::Quaternion q = transform.getRotation();
@@ -366,7 +370,7 @@ int main(int argc, char** argv){
 	      	marker_array.markers[4].pose.orientation.z = transform.getRotation().getZ();
 	      	marker_array.markers[4].pose.orientation.w = transform.getRotation().getW();
 	      	// Mostrar tamaño flecha proporcional a fuerza
-	      	marker_array.markers[4].scale.x = 0.01 * srv_pressure.response.applied_force[4];
+	      	marker_array.markers[4].scale.x = 0.1 * srv_pressure.response.applied_force[4];
 
         }catch (tf2::TransformException &ex) {
           ROS_WARN("%s",ex.what());
@@ -379,9 +383,9 @@ int main(int argc, char** argv){
                  // Visualization
         // Visualizacion forces
         try{
-          	ros::Time now = ros::Time::now();
+          	//ros::Time now = ros::Time::now();
           	tf::StampedTransform transform;
-          	tfListener.waitForTransform("forearm", "thsensor", now, ros::Duration(3.0));
+          	tfListener.waitForTransform("forearm", "thsensor", now, ros::Duration(1.0));
           	tfListener.lookupTransform("forearm", "thsensor", now, transform);
 	      	
 	      	tf::Quaternion q = transform.getRotation();
@@ -411,7 +415,7 @@ int main(int argc, char** argv){
 	      	marker_array.markers[0].pose.orientation.z = transform.getRotation().getZ();
 	      	marker_array.markers[0].pose.orientation.w = transform.getRotation().getW();
 	      	// Mostrar tamaño flecha proporcional a fuerza
-	      	marker_array.markers[0].scale.x = 0.01 * srv_pressure.response.applied_force[0];
+	      	marker_array.markers[0].scale.x = -0.1 * srv_pressure.response.applied_force[0];
         }catch (tf2::TransformException &ex) {
           ROS_WARN("%s",ex.what());
           ros::Duration(1.0).sleep();
@@ -421,6 +425,7 @@ int main(int argc, char** argv){
 
         marker_publisher.publish(marker_array);
         ROS_INFO("Marker array published...");
+       
     }
     else
     {

@@ -24,6 +24,7 @@ find_package(Boost REQUIRED system filesystem date_time thread)
 generate_dynamic_reconfigure_options(
   cfg/grasp_reconfiguration.cfg
   cfg/object_marker_reconfiguration.cfg
+  cfg/tactile_servo_reconfiguration.cfg
   #...
 )
 
@@ -78,6 +79,8 @@ add_executable(finger_jacobian_service src/finger_jacobian_service.cpp)
 add_executable(get_young_modulus src/get_young_modulus.cpp)
 add_executable(grasp_reconfiguration src/grasp_reconfiguration.cpp)
 add_executable(object_marker_reconfiguration src/object_marker_reconfiguration.cpp)
+add_executable(tactile_servo_reconfiguration src/tactile_servo_reconfiguration.cpp)
+
 
 
 target_link_libraries(object_marker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -87,6 +90,8 @@ target_link_libraries(finger_jacobian_service ${catkin_LIBRARIES} ${Boost_LIBRAR
 target_link_libraries(get_young_modulus ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(grasp_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(object_marker_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(tactile_servo_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 
 
 install(TARGETS object_marker DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -96,6 +101,9 @@ install(TARGETS finger_jacobian_service DESTINATION ${CATKIN_PACKAGE_BIN_DESTINA
 install(TARGETS get_young_modulus DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS grasp_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS object_marker_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(TARGETS tactile_servo_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 
 #common commands for building c++ executables and libraries
