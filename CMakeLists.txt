@@ -80,6 +80,8 @@ add_executable(get_young_modulus src/get_young_modulus.cpp)
 add_executable(grasp_reconfiguration src/grasp_reconfiguration.cpp)
 add_executable(object_marker_reconfiguration src/object_marker_reconfiguration.cpp)
 add_executable(tactile_servo_reconfiguration src/tactile_servo_reconfiguration.cpp)
+add_executable(get_DH_params src/get_DH_params.cpp)
+
 
 
 
@@ -91,6 +93,8 @@ target_link_libraries(get_young_modulus ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(grasp_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(object_marker_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(tactile_servo_reconfiguration ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(get_DH_params ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 
 
 
@@ -102,6 +106,7 @@ install(TARGETS get_young_modulus DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS grasp_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS object_marker_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(TARGETS tactile_servo_reconfiguration DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(TARGETS get_DH_params DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
